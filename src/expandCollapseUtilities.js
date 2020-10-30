@@ -600,14 +600,30 @@ return {
       });
     }
   },
+
+
+  getParent(node){
+    if(!node.removed()) return node
+
+    let nodes = cy.nodes('.cy-expand-collapse-collapsed-node')
+
+    let parent;
+    for(let i = 0; i < nodes.length; i++){
+      let n = nodes[i];
+      if(this.getCollapsedChildrenRecursively(n,cy.collection()).filter(el => el.id() === node.id()).length>0){
+        return n
+      }
+    }
+  },
+
   findNewEnd: function(node) {
     var current = node;
-    
-    while( !current.inside() ) {
-      current = current.parent();
-    }
-    
-    return current;
+    //
+    // while( !current.inside() ) {
+    //   current = this.getParent(current);
+    // }
+
+    return this.getParent(node);
   },
   repairEdges: function(node) {
     var connectedMetaEdges = node.connectedEdges('.cy-expand-collapse-meta-edge');
@@ -617,7 +633,6 @@ return {
       var originalEnds = edge.data('originalEnds');
       var currentSrcId = edge.data('source');
       var currentTgtId = edge.data('target');
-      
       if ( currentSrcId === node.id() ) {
         edge = edge.move({
           source: this.findNewEnd(originalEnds.source).id()
